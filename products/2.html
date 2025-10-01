@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Sản phẩm 2 - Arabica</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .label { font-weight: bold; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Thông tin sản phẩm Arabica</h1>
+  <div id="product" class="card"></div>
+
+  <script>
+    async function loadProduct() {
+      const res = await fetch('/api/products/2');
+      const product = await res.json();
+      const div = document.getElementById("product");
+      div.innerHTML = `
+        <p><span class="label">Tên:</span> ${product.name}</p>
+        <p><span class="label">Loại:</span> ${product.category}</p>
+        <p><span class="label">Xuất xứ:</span> ${product.origin}</p>
+        <p><span class="label">Nông trại:</span> ${product.farm}</p>
+        <p><span class="label">Website:</span> <a href="${product.website}" target="_blank">${product.website}</a></p>
+        <p><span class="label">Hạn sử dụng:</span> ${product.expire_date}</p>
+        <p><span class="label">Giá gốc:</span> ${product.price_original} VND</p>
+        <p><span class="label">Giá bán:</span> ${product.price_sell} VND</p>
+      `;
+    }
+    loadProduct();
+  </script>
+</body>
+</html>

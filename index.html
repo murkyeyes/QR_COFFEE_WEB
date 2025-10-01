@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tra cứu sản phẩm cà phê</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+    h1 { color: #333; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .label { font-weight: bold; color: #555; }
+    input, button { padding: 8px; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Tra cứu thông tin sản phẩm</h1>
+  <p>Nhập ID sản phẩm (1, 2 hoặc 3):</p>
+  <input type="number" id="productId" placeholder="Nhập số ID..." />
+  <button onclick="fetchProduct()">Xem thông tin</button>
+
+  <div id="result" class="card"></div>
+
+  <script>
+    async function fetchProduct() {
+      const id = document.getElementById("productId").value;
+      if (!id) {
+        alert("Vui lòng nhập ID sản phẩm!");
+        return;
+      }
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) {
+          throw new Error("Không tìm thấy sản phẩm");
+        }
+        const product = await res.json();
+        document.getElementById("result").innerHTML = `
+          <p><span class="label">Tên:</span> ${product.name}</p>
+          <p><span class="label">Loại:</span> ${product.category}</p>
+          <p><span class="label">Xuất xứ:</span> ${product.origin}</p>
+          <p><span class="label">Nông trại:</span> ${product.farm}</p>
+          <p><span class="label">Website:</span> <a href="${product.website}" target="_blank">${product.website}</a></p>
+          <p><span class="label">Hạn sử dụng:</span> ${product.expire_date}</p>
+          <p><span class="label">Giá gốc:</span> ${product.price_original} VND</p>
+          <p><span class="label">Giá bán:</span> ${product.price_sell} VND</p>
+        `;
+      } catch (err) {
+        document.getElementById("result").innerHTML = `<p style="color:red">${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

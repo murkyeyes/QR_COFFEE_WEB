@@ -2,34 +2,70 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Sản phẩm 1 - Robusta</title>
+  <title>Cà phê rang xay Robusta</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
-    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .label { font-weight: bold; color: #555; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3e5d8;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      background: #fff8f0;
+      border-radius: 15px;
+      box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+      width: 350px;
+      overflow: hidden;
+      text-align: center;
+    }
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-bottom: 2px solid #d2a679;
+    }
+    .card h2 {
+      color: #4e342e;
+      margin: 15px 0 10px;
+    }
+    .card p {
+      color: #6d4c41;
+      font-size: 15px;
+      padding: 0 15px;
+    }
+    .price {
+      font-size: 18px;
+      color: #bf360c;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .btn {
+      display: inline-block;
+      background: #6d4c41;
+      color: white;
+      padding: 10px 20px;
+      margin: 15px 0 20px;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #4e342e;
+    }
   </style>
 </head>
 <body>
-  <h1>Thông tin sản phẩm Robusta</h1>
-  <div id="product" class="card"></div>
-
-  <script>
-    async function loadProduct() {
-      const res = await fetch('/api/products/1');
-      const product = await res.json();
-      const div = document.getElementById("product");
-      div.innerHTML = `
-        <p><span class="label">Tên:</span> ${product.name}</p>
-        <p><span class="label">Loại:</span> ${product.category}</p>
-        <p><span class="label">Xuất xứ:</span> ${product.origin}</p>
-        <p><span class="label">Nông trại:</span> ${product.farm}</p>
-        <p><span class="label">Website:</span> <a href="${product.website}" target="_blank">${product.website}</a></p>
-        <p><span class="label">Hạn sử dụng:</span> ${product.expire_date}</p>
-        <p><span class="label">Giá gốc:</span> ${product.price_original} VND</p>
-        <p><span class="label">Giá bán:</span> ${product.price_sell} VND</p>
-      `;
-    }
-    loadProduct();
-  </script>
+  <div class="card">
+    <img src="https://trungnguyenlegend.com/wp-content/uploads/2023/03/robusta.jpg" alt="Robusta Coffee">
+    <h2>Cà phê rang xay Robusta</h2>
+    <p><b>Nguồn gốc:</b> Buôn Ma Thuột, Đắk Lắk</p>
+    <p><b>Nông trại:</b> Trung Nguyên</p>
+    <p><b>Website:</b> <a href="https://trungnguyenlegend.com/">trungnguyenlegend.com</a></p>
+    <p class="price">150.000 VND</p>
+    <a href="#" class="btn">Mua ngay</a>
+  </div>
 </body>
 </html>

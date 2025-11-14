@@ -43,7 +43,7 @@ Dự án được xây dựng với React cho Frontend và Node.js/Express/Postg
 1. Mở **pgAdmin** (hoặc psql).  
 2. Tạo một database mới với tên là coffee\_db.  
 3. Mở **Query Tool** (công cụ truy vấn) cho coffee\_db.  
-4. Copy và dán toàn bộ nội dung của file SQL (bắt đầu bằng DROP TABLE...) vào và thực thi để tạo bảng (products, nutrition, orders) và thêm dữ liệu mẫu.
+4. Copy và dán toàn bộ nội dung của file SQL (bắt đầu bằng DROP TABLE...) vào và thực thi để tạo bảng (products, coffee_profile, users) và thêm dữ liệu mẫu.
 
 ### **3\. Cài đặt Backend (Terminal 1\)**
 

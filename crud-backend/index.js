@@ -2,7 +2,9 @@
 import express from 'express';
 import cors from 'cors'; 
 import productRoutes from './routes/productRoute.js';
-import authRoutes from './routes/authRoute.js'; // <-- 1. IMPORT FILE MỚI
+import authRoutes from './routes/authRoute.js';
+import batchRoutes from './routes/batchRoute.js';
+import referenceRoutes from './routes/referenceRoute.js';
 
 const app = express();
 const port = 3000;
@@ -11,7 +13,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api', productRoutes);
-app.use('/api', authRoutes); // <-- 2. SỬ DỤNG FILE MỚI
+app.use('/api', authRoutes);
+app.use('/api/batches', batchRoutes);
+app.use('/api/reference', referenceRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port 3000`);

@@ -87,7 +87,7 @@ export default function HomePage() {
       {/* 5. Footer */}
       <footer className="footer footer-center p-4 bg-base-300 text-base-content">
         <div>
-          <p>Copyright © 2025 - All right reserved by Coffee Trace</p>
+          <p>Copyright © 2025 - All right reserved by Khải Phạm và Huy Trần</p>
         </div>
       </footer>
     </div>

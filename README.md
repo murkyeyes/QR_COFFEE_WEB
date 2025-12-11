@@ -58,7 +58,7 @@ Dự án được xây dựng với React cho Frontend và Node.js/Express/Postg
 ### **4\. Cài đặt Frontend (Terminal 2\)**
 
 1. Mở một terminal **thứ hai** và di chuyển vào thư mục frontend:  
-   cd crud-frontend-v1
+   cd crud-frontend
 
 2. Cài đặt các gói phụ thuộc (bao gồm react-router-dom):  
    npm install

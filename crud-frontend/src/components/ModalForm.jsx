@@ -106,7 +106,7 @@ export default function ModalForm({ isOpen, onClose, mode, onSubmit, productData
                     </label>
                     <label className="input input-bordered flex items-center my-4 gap-2">
                         Farm 
-                        <input type="text" className="grow" value={farm} onChange={(e) => setFarm(e.f.target.value)}/>
+                        <input type="text" className="grow" value={farm} onChange={(e) => setFarm(e.target.value)}/>
                     </label>
                     <label className="input input-bordered flex items-center my-4 gap-2">
                         Website 

@@ -2,8 +2,8 @@
 
 import './App.css'
 import Navbar from './components/Navbar'
-import TableList from './components/TableList' // Import file "con"
-import ModalForm from './components/ModalForm';
+import TableList from './components/TableList'
+import ModalFormBatch from './components/ModalFormBatch';
 import { useState } from 'react';
 import axios from 'axios';
 import ProductScanner from './components/ProductScanner';
@@ -28,35 +28,37 @@ function AdminPage() {
     setIsOpen(true);
   };
 
-  const handleSubmit = async (newProductData) => {
+  const handleSubmit = async (newBatchData) => {
     if (modalMode === 'add') {
       try {
-        const response = await axios.post('http://localhost:3000/api/products', newProductData);
+        const response = await axios.post('http://localhost:3000/api/batches', newBatchData);
         setRefreshKey(k => k + 1);
       } catch (error) {
-        console.error('Error adding product:', error);
+        console.error('Error adding batch:', error);
+        alert('Lỗi khi thêm lô sản phẩm: ' + error.message);
       }
     } else {
       try {
-        const id = clientData?.product_id; 
-        if (!id) throw new Error('Missing product id for edit');
-        const response = await axios.put(`http://localhost:3000/api/products/${id}`, newProductData);
+        const id = clientData?.batch_id; 
+        if (!id) throw new Error('Missing batch id for edit');
+        const response = await axios.put(`http://localhost:3000/api/batches/${id}`, newBatchData);
         setRefreshKey(k => k + 1);
       } catch (err) {
-        console.error('Error editing product:', err);
+        console.error('Error editing batch:', err);
+        alert('Lỗi khi cập nhật lô sản phẩm: ' + err.message);
       }
     }
     setIsOpen(false);
   };
 
-  const handleScanSuccess = async (productId) => {
+  const handleScanSuccess = async (batchId) => {
     setIsScannerOpen(false); 
     try {
-      const response = await axios.get(`http://localhost:3000/api/products/${productId}`);
+      const response = await axios.get(`http://localhost:3000/api/batches/${batchId}`);
       handleOpen('edit', response.data); 
     } catch (err) {
-      console.error('Error fetching scanned product:', err);
-      alert(`Error: Product with ID ${productId} not found!`);
+      console.error('Error fetching scanned batch:', err);
+      alert(`Error: Batch with ID ${batchId} not found!`);
     }
   };
 
@@ -87,11 +89,11 @@ function AdminPage() {
         refreshKey={refreshKey} 
       />
 
-      <ModalForm 
+      <ModalFormBatch 
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         mode={modalMode}
-        productData={clientData} 
+        batchData={clientData} 
         onSubmit={handleSubmit}
       />
       

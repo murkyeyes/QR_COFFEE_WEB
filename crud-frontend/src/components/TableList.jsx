@@ -1,5 +1,3 @@
-// src/components/TableList.jsx (Code ĐÃ SỬA LỖI)
-
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -7,20 +5,16 @@ export default function TableList({ handleOpen, searchTerm, refreshKey }) {
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
 
-    const placeholderImage = 'https://placehold.co/100x100/5C3A2F/FFFFFF?text=No+Image';
-
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/products');
-            
-            // === SỬA LỖI 1: Đảm bảo 'sorted' luôn là một mảng ===
-            const sorted = Array.isArray(response.data) ? response.data.sort((a, b) => a.product_id - b.product_id) : response.data;
-            setTableData(sorted || []); // <-- THÊM "|| []" ĐỂ TRÁNH BỊ NULL
-            // ==================================================
-
+            const response = await axios.get('http://localhost:3000/api/batches');
+            const sorted = Array.isArray(response.data) 
+                ? response.data.sort((a, b) => b.batch_id - a.batch_id) 
+                : [];
+            setTableData(sorted);
         } catch (err) {
             setError(err.message);
-            console.error('Error fetching data:', err);
+            console.error('Error fetching batches:', err);
         }
     };
 
@@ -29,72 +23,69 @@ export default function TableList({ handleOpen, searchTerm, refreshKey }) {
     }, [refreshKey]);
 
     const handleDelete = async (id) => {
-        const confirmDelete = window.confirm('Are you sure you want to delete this product?');
+        const confirmDelete = window.confirm('Bạn có chắc muốn xóa lô sản phẩm này?');
         if (!confirmDelete) return;
         try {
-            await axios.delete(`http://localhost:3000/api/products/${id}`);
-            setTableData(prevData => prevData.filter(product => product.product_id !== id));
+            await axios.delete(`http://localhost:3000/api/batches/${id}`);
+            setTableData(prevData => prevData.filter(batch => batch.batch_id !== id));
         } catch (err) {
             setError(err.message);
-            console.error('Error deleting product:', err);
+            console.error('Error deleting batch:', err);
         }
     };
 
-    // === SỬA LỖI 2: Đảm bảo 'searchTerm' không bị undefined === 
-    const filteredData = tableData.filter(product =>
-        // THÊM "(searchTerm || '')" để tránh lỗi'toLowerCase'
-        product.name.toLowerCase().includes((searchTerm || '').toLowerCase()) ||
-        (product.category && product.category.toLowerCase().includes((searchTerm || '').toLowerCase())) ||
-        (product.origin && product.origin.toLowerCase().includes((searchTerm || '').toLowerCase()))
+    const filteredData = tableData.filter(batch =>
+        (batch.variety_name && batch.variety_name.toLowerCase().includes((searchTerm || '').toLowerCase())) ||
+        (batch.farm_name && batch.farm_name.toLowerCase().includes((searchTerm || '').toLowerCase())) ||
+        (batch.farm_region && batch.farm_region.toLowerCase().includes((searchTerm || '').toLowerCase())) ||
+        (batch.processing_method && batch.processing_method.toLowerCase().includes((searchTerm || '').toLowerCase()))
     );
-    // =======================================================
 
     return (
         <>
         {/* ... (phần <thead> ... <tbody> của bạn không thay đổi) ... */}
         {error && <div className="alert alert-error mb-4">{error}</div>}
         <div className="overflow-x-auto mt-10">
-            <table className="table">
+            <table className="table table-zebra">
                 <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Ảnh</th> 
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Origin</th>
-                    <th>Price (Sell)</th>
+                    <th>Batch ID</th>
+                    <th>Giống cà phê</th>
+                    <th>Trang trại</th>
+                    <th>Vùng</th>
+                    <th>Phương pháp</th>
+                    <th>Mức rang</th>
+                    <th>Ngày thu hoạch</th>
+                    <th>HSD</th>
+                    <th>Giá bán</th>
                     <th></th>
                     <th></th>
                 </tr>
                 </thead>
                 <tbody>
-                    {filteredData.map((product) => (
-                        <tr key={product.product_id} className="hover">
-                            <th>{product.product_id}</th>
+                    {filteredData.map((batch) => (
+                        <tr key={batch.batch_id} className="hover">
+                            <th>{batch.batch_id}</th>
+                            <td><strong>{batch.variety_name}</strong></td>
+                            <td>{batch.farm_name}</td>
+                            <td>{batch.farm_region || '-'}</td>
+                            <td><span className="badge badge-sm">{batch.processing_method || '-'}</span></td>
+                            <td><span className="badge badge-sm badge-neutral">{batch.roast_level || '-'}</span></td>
+                            <td>{batch.harvest_date ? new Date(batch.harvest_date).toLocaleDateString('vi-VN') : '-'}</td>
+                            <td>{batch.expiry_date ? new Date(batch.expiry_date).toLocaleDateString('vi-VN') : '-'}</td>
+                            <td>{batch.price_sell ? Number(batch.price_sell).toLocaleString('vi-VN') + ' VNĐ' : '-'}</td>
                             <td>
-                                <div className="avatar">
-                                    <div className="mask mask-squircle w-12 h-12">
-                                        <img 
-                                            src={product.image_url || placeholderImage} 
-                                            alt={product.name} 
-                                            onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
-                                        />
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{product.name}</td>
-                            <td>{product.category}</td>
-                            <td>{product.origin}</td>
-                            <td>{Number(product.price_sell).toLocaleString('vi-VN')} VNĐ</td>
-                            <td>
-                                <button className="btn btn-secondary " onClick={() => handleOpen('edit', product)}>Update</button>
+                                <button className="btn btn-sm btn-secondary" onClick={() => handleOpen('edit', batch)}>
+                                    Update
+                                </button>
                             </td>
                             <td>
-                                <button className="btn btn-accent" onClick={() => handleDelete(product.product_id)}>Delete</button>
+                                <button className="btn btn-sm btn-accent" onClick={() => handleDelete(batch.batch_id)}>
+                                    Delete
+                                </button>
                             </td>
                         </tr>
                     ))}
-                    
                 </tbody>
             </table>
             </div>

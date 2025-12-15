@@ -23,6 +23,8 @@ export default function LoginPage() {
       
       // Đăng nhập thành công (backend trả về status 200)
       localStorage.setItem('isAdminLoggedIn', 'true'); // Đặt cờ
+      localStorage.setItem('userRole', response.data.role); // Lưu role (admin hoặc manager)
+      localStorage.setItem('username', username); // Lưu username
       navigate('/admin'); // Chuyển hướng đến trang quản trị
 
     } catch (err) {

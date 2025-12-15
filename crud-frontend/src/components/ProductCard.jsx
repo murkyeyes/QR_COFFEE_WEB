@@ -6,7 +6,7 @@ export default function ProductCard({ product }) {
   const placeholderImage = 'https://placehold.co/300x300/5C3A2F/FFFFFF?text=No+Image';
 
   const handleViewDetails = () => {
-    navigate(`/product/${product.product_id}`);
+    navigate(`/product/${product.batch_id}`);
   };
 
   return (
@@ -14,15 +14,16 @@ export default function ProductCard({ product }) {
       <figure className="px-4 pt-4">
         <img
           src={product.image_url || placeholderImage}
-          alt={product.name}
+          alt={product.variety_name || 'Coffee'}
           className="rounded-xl h-48 w-full object-cover"
           onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
         />
       </figure>
       <div className="card-body items-center text-center">
-        <h2 className="card-title h-14 overflow-hidden">{product.name}</h2>
+        <h2 className="card-title h-14 overflow-hidden">{product.variety_name}</h2>
+        <p className="text-sm text-gray-600">{product.farm_name} - {product.farm_region}</p>
         <p className="text-lg font-bold text-primary">
-          {Number(product.price_sell).toLocaleString('vi-VN')} VNĐ
+          {product.price_sell ? Number(product.price_sell).toLocaleString('vi-VN') + ' VNĐ' : 'Liên hệ'}
         </p>
         <div className="card-actions">
           <button 

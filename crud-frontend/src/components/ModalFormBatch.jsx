@@ -3,6 +3,10 @@ import axios from "axios";
 
 export default function ModalForm({ isOpen, onClose, mode, batchData, onSubmit }) {
     
+    // Check user role
+    const userRole = localStorage.getItem('userRole') || 'admin';
+    const isManager = userRole === 'manager';
+    
     // Reference data
     const [varieties, setVarieties] = useState([]);
     const [farms, setFarms] = useState([]);
@@ -112,10 +116,11 @@ export default function ModalForm({ isOpen, onClose, mode, batchData, onSubmit }
                 sweetness,
                 aftertaste,
                 cupping_score: cupping_score ? Number(cupping_score) : null,
-                // Prices
+                // Prices - Gửi lên backend, backend sẽ kiểm tra permission
                 price_original: price_original ? Number(price_original) : null,
                 price_sell: price_sell ? Number(price_sell) : null
             };
+            
             await onSubmit(payload);
         } catch (err) {
             console.error('Error submitting form:', err);
@@ -268,15 +273,33 @@ export default function ModalForm({ isOpen, onClose, mode, batchData, onSubmit }
                         </label>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 mt-4">
+                    {/* === PRICE === */}
+                    <div className="divider text-sm font-bold mt-6">
+                        Giá sản phẩm 
+                        {isManager && <span className="badge badge-warning badge-sm ml-2">⚠️ Manager sẽ bị từ chối khi lưu</span>}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
                         <label className="form-control w-full">
                             <div className="label"><span className="label-text">Giá gốc (VNĐ)</span></div>
-                            <input type="number" className="input input-bordered" value={price_original} onChange={(e) => setPriceOriginal(e.target.value)} placeholder="100000" />
+                            <input 
+                                type="number" 
+                                className={`input input-bordered ${isManager ? 'input-warning' : ''}`}
+                                value={price_original} 
+                                onChange={(e) => setPriceOriginal(e.target.value)} 
+                                placeholder="100000"
+                            />
                         </label>
                         
                         <label className="form-control w-full">
                             <div className="label"><span className="label-text">Giá bán (VNĐ)</span></div>
-                            <input type="number" className="input input-bordered" value={price_sell} onChange={(e) => setPriceSell(e.target.value)} placeholder="150000" />
+                            <input 
+                                type="number" 
+                                className={`input input-bordered ${isManager ? 'input-warning' : ''}`}
+                                value={price_sell} 
+                                onChange={(e) => setPriceSell(e.target.value)} 
+                                placeholder="150000"
+                            />
                         </label>
                     </div>
                     

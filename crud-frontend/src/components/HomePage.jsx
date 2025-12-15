@@ -16,7 +16,7 @@ export default function HomePage() {
   // Tải danh sách sản phẩm từ backend
   useEffect(() => {
     setLoading(true);
-    axios.get('http://localhost:3000/api/products')
+    axios.get('http://localhost:3000/api/batches')
       .then(response => {
         setProducts(response.data.slice(0, 3)); // Chỉ lấy 3 sản phẩm
         setLoading(false);
@@ -67,7 +67,7 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {products.map(product => (
-              <ProductCard key={product.product_id} product={product} />
+              <ProductCard key={product.batch_id} product={product} />
             ))}
           </div>
         )}

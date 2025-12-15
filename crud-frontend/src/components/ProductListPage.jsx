@@ -18,8 +18,8 @@ export default function ProductListPage() {
 
     // Quyết định URL: nếu có 'query' thì tìm kiếm, không thì lấy tất cả
     const url = query 
-      ? `http://localhost:3000/api/products/search?q=${query}`
-      : 'http://localhost:3000/api/products';
+      ? `http://localhost:3000/api/batches/search?q=${query}`
+      : 'http://localhost:3000/api/batches';
 
     axios.get(url)
       .then(response => {

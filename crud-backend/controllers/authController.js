@@ -1,28 +1,25 @@
 import { query } from "../db.js";
+import bcrypt from "bcrypt";
 
 export const login = async (req, res) => {
-    // 'password' là chuỗi '12345' bạn nhập từ web
     const { username, password } = req.body; 
 
     try {
-        // 1. Tìm user 'admin'
-        const { rows } = await query('SELECT * FROM users WHERE username = $1', [username]);
+        // 1. Tìm user trong database
+        const { rows } = await query('SELECT * FROM coffee.users WHERE username = $1', [username]);
         
         if (rows.length === 0) {
             return res.status(401).json({ error: 'Tên đăng nhập không đúng!' });
         }
         
         const user = rows[0]; 
-        // user.password_hash bây giờ là chuỗi '12345' (từ database)
 
-        // 2. So sánh chuỗi '12345' (từ web) với chuỗi '12345' (từ DB)
-        if (password === user.password_hash) {
-            
-            // Khớp!
+        // 2. So sánh password với bcrypt
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+        
+        if (isPasswordValid) {
             res.status(200).json({ message: 'Đăng nhập thành công', role: user.role });
-
         } else {
-            // Không khớp
             return res.status(401).json({ error: 'Mật khẩu không đúng!' });
         }
 

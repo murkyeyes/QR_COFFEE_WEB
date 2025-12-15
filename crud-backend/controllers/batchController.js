@@ -31,7 +31,19 @@ export const createBatch = async (req, res) => {
         res.status(201).json(newBatch);
     } catch (error) {
         console.error('Error creating batch:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        
+        // Kiểm tra lỗi permission từ database
+        if (error.code === '42501') {
+            return res.status(403).json({ 
+                error: 'Bạn không có quyền thực hiện thao tác này!',
+                details: 'Manager không được phép sửa đổi giá sản phẩm.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            error: 'Lỗi hệ thống',
+            details: error.message 
+        });
     }
 };
 
@@ -46,7 +58,19 @@ export const updateBatch = async (req, res) => {
         res.status(200).json(updatedBatch);
     } catch (error) {
         console.error('Error updating batch:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        
+        // Kiểm tra lỗi permission từ database
+        if (error.code === '42501') {
+            return res.status(403).json({ 
+                error: 'Bạn không có quyền thực hiện thao tác này!',
+                details: 'Manager không được phép sửa đổi giá sản phẩm.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            error: 'Lỗi hệ thống',
+            details: error.message 
+        });
     }
 };
 

@@ -1,8 +1,9 @@
 -- ============================================
--- COFFEE QR DATABASE - NORMALIZED STRUCTURE
+-- COFFEE QR DATABASE - COMPLETE WITH SAMPLE DATA
+-- Chạy file này để tạo database hoàn chỉnh với dữ liệu mẫu
 -- ============================================
 
--- (0) Drop existing tables and create schema
+-- (0) Drop and create schema
 DROP VIEW  IF EXISTS coffee.v_qr_lookup;
 DROP VIEW  IF EXISTS coffee.v_qr_public;
 DROP TABLE IF EXISTS coffee.qrcode           CASCADE;
@@ -17,22 +18,23 @@ DROP TABLE IF EXISTS coffee.product          CASCADE;
 DROP TABLE IF EXISTS coffee.users            CASCADE;
 CREATE SCHEMA IF NOT EXISTS coffee;
 
--- (1) Product Line (Coffee, Tea, etc.)
+-- (1) Product Line
 CREATE TABLE coffee.product (
   product_id   SERIAL PRIMARY KEY,
-  name         VARCHAR(80) NOT NULL,        -- "Coffee"
+  name         VARCHAR(80) NOT NULL,
   category     VARCHAR(40) NOT NULL DEFAULT 'beverage',
   description  TEXT
 );
 
--- (2) Coffee Variety (Arabica, Robusta, Liberica, Excelsa...)
+-- (2) Coffee Variety
 CREATE TABLE coffee.variety (
   variety_id        SERIAL PRIMARY KEY,
   product_id        INT NOT NULL REFERENCES coffee.product(product_id),
-  name              VARCHAR(120) NOT NULL,   -- "Arabica", "Robusta"
-  species           VARCHAR(60),             -- "Coffea arabica", "Coffea canephora"
-  characteristics   TEXT,                    -- Đặc điểm nổi bật
-  origin_country    VARCHAR(120)             -- Nguồn gốc giống
+  name              VARCHAR(120) NOT NULL,
+  species           VARCHAR(60),
+  characteristics   TEXT,
+  origin_country    VARCHAR(120),
+  image_url         VARCHAR(255)
 );
 
 -- (3) Farm / Supplier
@@ -40,25 +42,25 @@ CREATE TABLE coffee.farm (
   farm_id       SERIAL PRIMARY KEY,
   name          VARCHAR(160) NOT NULL,
   address       VARCHAR(255),
-  region        VARCHAR(120),               -- Buôn Ma Thuột, Lâm Đồng...
+  region        VARCHAR(120),
   phone         VARCHAR(30),
   website       VARCHAR(255),
-  certification VARCHAR(160)                -- Organic, UTZ, Rainforest Alliance...
+  certification VARCHAR(160)
 );
 
 -- (4) Processing Methods
 CREATE TABLE coffee.processing_method (
   method_id     SERIAL PRIMARY KEY,
-  name          VARCHAR(80) NOT NULL UNIQUE, -- "Washed", "Natural", "Honey"
+  name          VARCHAR(80) NOT NULL UNIQUE,
   description   TEXT
 );
 
 -- (5) Roast Levels
 CREATE TABLE coffee.roast_level (
   level_id      SERIAL PRIMARY KEY,
-  name          VARCHAR(80) NOT NULL UNIQUE, -- "Light", "Medium", "Dark"
+  name          VARCHAR(80) NOT NULL UNIQUE,
   description   TEXT,
-  color_value   VARCHAR(20)                  -- "#8B4513" (màu nâu)
+  color_value   VARCHAR(20)
 );
 
 -- (6) Batch / Production Lot
@@ -72,36 +74,36 @@ CREATE TABLE coffee.batch (
   roast_date     DATE,
   expiry_date    DATE NOT NULL,
   grade          VARCHAR(2)  CHECK (grade IN ('A','B','C')),
-  altitude_m     INT,                        -- Độ cao trồng (m)
+  altitude_m     INT,
   weight_kg      NUMERIC(10,2) CHECK (weight_kg >= 0),
-  certification_code VARCHAR(120)            -- Mã chứng nhận cho lô
+  certification_code VARCHAR(120)
 );
 
--- (7) Coffee Profile (Flavor characteristics)
+-- (7) Coffee Profile
 CREATE TABLE coffee.coffee_profile (
   profile_id         SERIAL PRIMARY KEY,
   batch_id           INT NOT NULL REFERENCES coffee.batch(batch_id) ON DELETE CASCADE,
-  tasting_notes      VARCHAR(255),           -- "Chocolate, Nuts, Caramel"
-  acidity            VARCHAR(50),            -- "High", "Medium", "Low"
-  body               VARCHAR(50),            -- "Full", "Medium", "Light"
-  sweetness          VARCHAR(50),            -- "High", "Medium", "Low"
-  aftertaste         VARCHAR(100),           -- "Mật ong, kéo dài"
-  brix               NUMERIC(4,1),           -- Độ ngọt Brix (nếu có)
-  cupping_score      NUMERIC(4,2)            -- Điểm chuyên gia (0-100)
+  tasting_notes      VARCHAR(255),
+  acidity            VARCHAR(50),
+  body               VARCHAR(50),
+  sweetness          VARCHAR(50),
+  aftertaste         VARCHAR(100),
+  brix               NUMERIC(4,1),
+  cupping_score      NUMERIC(4,2)
 );
 
--- (8) QR Code linked to batch
+-- (8) QR Code
 CREATE TABLE coffee.qrcode (
   qr_id          SERIAL PRIMARY KEY,
   batch_id       INT NOT NULL REFERENCES coffee.batch(batch_id),
-  code           VARCHAR(128) NOT NULL UNIQUE,    -- QR content
-  status         VARCHAR(16) NOT NULL DEFAULT 'active',  -- active|used|revoked
+  code           VARCHAR(128) NOT NULL UNIQUE,
+  status         VARCHAR(16) NOT NULL DEFAULT 'active',
   scan_count     INT DEFAULT 0,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_scanned   TIMESTAMPTZ
 );
 
--- (9) Price History by Variety
+-- (9) Price History
 CREATE TABLE coffee.price_history (
   price_id       SERIAL PRIMARY KEY,
   variety_id     INT NOT NULL REFERENCES coffee.variety(variety_id),
@@ -113,7 +115,7 @@ CREATE TABLE coffee.price_history (
   CONSTRAINT ck_valid_range CHECK (valid_to IS NULL OR valid_to >= valid_from)
 );
 
--- (10) Users / Admin accounts
+-- (10) Users
 CREATE TABLE coffee.users (
   user_id        SERIAL PRIMARY KEY,
   username       VARCHAR(50) NOT NULL UNIQUE,
@@ -181,7 +183,7 @@ LEFT JOIN LATERAL (
 ) ph ON TRUE;
 
 -- ============================================
--- SAMPLE DATA
+-- SAMPLE DATA - ĐẦY ĐỦ DỮ LIỆU MẪU
 -- ============================================
 
 -- Products
@@ -189,12 +191,12 @@ INSERT INTO coffee.product (product_id, name, category, description) VALUES
 (1, 'Coffee', 'Đồ uống', 'Sản phẩm cà phê các loại tại Việt Nam');
 
 -- Varieties
-INSERT INTO coffee.variety (product_id, name, species, characteristics, origin_country) VALUES
-(1, 'Robusta', 'Coffea canephora', 'Hương đậm đắng, caffeine cao, dễ trồng', 'Việt Nam'),
-(1, 'Arabica', 'Coffea arabica', 'Hương hoa trái, chua thanh, caffeine thấp hơn', 'Ethiopia'),
-(1, 'Liberica', 'Coffea liberica', 'Hạt to, hương trái cây nhiệt đới, thân gỗ', 'Liberia'),
-(1, 'Excelsa', 'Coffea excelsa', 'Hương trái cây, rượu vang, độc đáo', 'Trung Phi'),
-(1, 'Kopi Luwak', 'Coffea arabica (đặc biệt)', 'Qua xử lý tự nhiên của cầy hương, êm mượt', 'Indonesia');
+INSERT INTO coffee.variety (product_id, name, species, characteristics, origin_country, image_url) VALUES
+(1, 'Robusta', 'Coffea canephora', 'Hương đậm đắng, caffeine cao, dễ trồng', 'Việt Nam', '/robusta.png'),
+(1, 'Arabica', 'Coffea arabica', 'Hương hoa trái, chua thanh, caffeine thấp hơn', 'Ethiopia', '/arabica.png'),
+(1, 'Liberica', 'Coffea liberica', 'Hạt to, hương trái cây nhiệt đới, thân gỗ', 'Liberia', '/liberica.jpg'),
+(1, 'Excelsa', 'Coffea excelsa', 'Hương trái cây, rượu vang, độc đáo', 'Trung Phi', '/excelsa.jpg'),
+(1, 'Cà phê Chồn', 'Coffea arabica', 'Cà phê đặc biệt qua hệ tiêu hóa của chồn hương, hương vị êm mượt, không đắng', 'Việt Nam', '/chon.jpg');
 
 -- Farms
 INSERT INTO coffee.farm (name, address, region, phone, website, certification) VALUES
@@ -221,7 +223,7 @@ INSERT INTO coffee.batch (variety_id, farm_id, method_id, level_id, harvest_date
                           expiry_date, grade, altitude_m, weight_kg, certification_code) VALUES
 (1, 1, 2, 3, '2025-10-15', '2025-11-01', '2026-12-12', 'A', 600, 1200, 'TN-ROB-2025-001'),
 (2, 2, 1, 2, '2025-09-20', '2025-10-15', '2026-10-01', 'A', 1500, 900, 'CD-ARA-2025-002'),
-(5, 1, 4, 2, '2025-07-10', '2025-08-01', '2026-08-05', 'A', 800, 50, 'TN-KOP-2025-003'),
+(5, 1, 4, 2, '2025-07-10', '2025-08-01', '2026-08-05', 'A', 800, 50, 'TN-CHON-2025-003'),
 (4, 3, 2, 1, '2025-08-25', '2025-09-10', '2026-09-01', 'B', 700, 500, 'VN-EXC-2025-004'),
 (3, 4, 3, 2, '2025-08-30', '2025-09-15', '2026-09-01', 'A', 400, 600, 'MIT-LIB-2025-005');
 
@@ -229,7 +231,7 @@ INSERT INTO coffee.batch (variety_id, farm_id, method_id, level_id, harvest_date
 INSERT INTO coffee.coffee_profile (batch_id, tasting_notes, acidity, body, sweetness, aftertaste, cupping_score) VALUES
 (1, 'Đậm đắng, sô-cô-la đen, khói', 'Thấp', 'Dày (Full)', 'Thấp', 'Đắng kéo dài', 78.5),
 (2, 'Hương hoa, cam quýt, trà, mật ong', 'Cao', 'Vừa (Medium)', 'Cao', 'Ngọt thanh, kéo dài', 86.0),
-(3, 'Êm dịu, sô-cô-la sữa, ít đắng, ngọt tự nhiên', 'Rất thấp', 'Dày (Full)', 'Cao', 'Ngọt mượt', 92.5),
+(3, 'Hương êm dịu, mượt mà, hương chocolate, caramel, không đắng, vị ngọt tự nhiên', 'Rất thấp', 'Mượt (Smooth)', 'Cao', 'Ngọt kéo dài, thanh thoát', 92.5),
 (4, 'Trái cây chín, hương rượu vang, chua thanh', 'Cao', 'Vừa (Medium)', 'Vừa', 'Chua nhẹ, sảng khoái', 82.0),
 (5, 'Hương mít, trái cây nhiệt đới, thảo mộc', 'Vừa', 'Dày (Full)', 'Vừa', 'Vị trái cây kéo dài', 80.5);
 
@@ -238,7 +240,7 @@ INSERT INTO coffee.qrcode (batch_id, code, status) VALUES
 (1, 'QR-COFFEE-ROB-20251115-0001', 'active'),
 (1, 'QR-COFFEE-ROB-20251115-0002', 'active'),
 (2, 'QR-COFFEE-ARA-20251015-0001', 'active'),
-(3, 'QR-COFFEE-KOP-20250801-0001', 'active'),
+(3, 'QR-COFFEE-CHON-20250801-0001', 'active'),
 (4, 'QR-COFFEE-EXC-20250910-0001', 'active'),
 (5, 'QR-COFFEE-LIB-20250915-0001', 'active');
 
@@ -261,10 +263,66 @@ INSERT INTO coffee.price_history (variety_id, price_type, currency, amount, vali
 (3, 'original', 'VND', 180000, '2025-09-01', NULL),
 (3, 'selling', 'VND', 220000, '2025-09-15', NULL);
 
--- Users
+-- Users (Tài khoản admin với bcrypt hash)
 INSERT INTO coffee.users (username, password_hash, email, role) VALUES
-('admin', '12345', 'admin@coffee.vn', 'admin'),
-('manager', '12345', 'manager@coffee.vn', 'manager');
+('admin', '$2b$10$Try.C6J.QQNyyOGBrsF.1OLTGp8/.9Aa5/wWutq1Z40L3sBYOiYgm', 'admin@coffee.vn', 'admin'),
+('manager', '$2b$10$jfeHAFabgOR0H9voxUfQROXkszgnTAsblL9eIiskYZSYCUzuZVGoK', 'manager@coffee.vn', 'manager');
+
+-- ============================================
+-- DATABASE ROLES & PERMISSIONS
+-- ============================================
+
+-- Tạo role cho Admin (quyền đầy đủ)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'coffee_admin_role') THEN
+        CREATE ROLE coffee_admin_role;
+    END IF;
+END
+$$;
+
+-- Tạo role cho Manager (không được sửa giá)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'coffee_manager_role') THEN
+        CREATE ROLE coffee_manager_role;
+    END IF;
+END
+$$;
+
+-- GRANT toàn bộ quyền cho Admin
+GRANT ALL PRIVILEGES ON SCHEMA coffee TO coffee_admin_role;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA coffee TO coffee_admin_role;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA coffee TO coffee_admin_role;
+
+-- GRANT quyền cho Manager (TẤT CẢ trừ price_history)
+GRANT USAGE ON SCHEMA coffee TO coffee_manager_role;
+
+-- Manager có quyền đọc tất cả tables
+GRANT SELECT ON ALL TABLES IN SCHEMA coffee TO coffee_manager_role;
+
+-- Manager có quyền CRUD trên các bảng KHÔNG liên quan đến giá
+GRANT INSERT, UPDATE, DELETE ON coffee.product TO coffee_manager_role;
+GRANT INSERT, UPDATE, DELETE ON coffee.variety TO coffee_manager_role;
+GRANT INSERT, UPDATE, DELETE ON coffee.farm TO coffee_manager_role;
+GRANT INSERT, UPDATE, DELETE ON coffee.processing_method TO coffee_manager_role;
+GRANT INSERT, UPDATE, DELETE ON coffee.roast_level TO coffee_manager_role;
+GRANT INSERT, UPDATE, DELETE ON coffee.batch TO coffee_manager_role;
+GRANT INSERT, UPDATE, DELETE ON coffee.coffee_profile TO coffee_manager_role;
+GRANT INSERT, UPDATE, DELETE ON coffee.qrcode TO coffee_manager_role;
+
+-- Manager CHỈ được SELECT trên price_history (KHÔNG được INSERT, UPDATE, DELETE)
+-- (Đã grant SELECT ALL ở trên rồi, nên không cần thêm)
+
+-- Manager có quyền sử dụng sequences
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA coffee TO coffee_manager_role;
+
+-- Đảm bảo quyền cho future objects
+ALTER DEFAULT PRIVILEGES IN SCHEMA coffee GRANT ALL ON TABLES TO coffee_admin_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA coffee GRANT ALL ON SEQUENCES TO coffee_admin_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA coffee GRANT SELECT ON TABLES TO coffee_manager_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA coffee GRANT USAGE, SELECT ON SEQUENCES TO coffee_manager_role;
 
 -- ============================================
 -- RESET SEQUENCES
@@ -281,7 +339,7 @@ SELECT setval('coffee.price_history_price_id_seq', (SELECT max(price_id)    FROM
 SELECT setval('coffee.users_user_id_seq',          (SELECT max(user_id)     FROM coffee.users));
 
 -- ============================================
--- ENABLE FULL-TEXT SEARCH (OPTIONAL)
+-- ENABLE FULL-TEXT SEARCH
 -- ============================================
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -293,3 +351,27 @@ ON coffee.farm USING gin (name gin_trgm_ops);
 
 CREATE INDEX IF NOT EXISTS trgm_idx_farm_region 
 ON coffee.farm USING gin (region gin_trgm_ops);
+
+-- ============================================
+-- VERIFICATION
+-- ============================================
+SELECT '✅ Database created successfully!' as status;
+SELECT 'Products:' as table_name, COUNT(*) as count FROM coffee.product
+UNION ALL
+SELECT 'Varieties:', COUNT(*) FROM coffee.variety
+UNION ALL
+SELECT 'Farms:', COUNT(*) FROM coffee.farm
+UNION ALL
+SELECT 'Processing Methods:', COUNT(*) FROM coffee.processing_method
+UNION ALL
+SELECT 'Roast Levels:', COUNT(*) FROM coffee.roast_level
+UNION ALL
+SELECT 'Batches:', COUNT(*) FROM coffee.batch
+UNION ALL
+SELECT 'Coffee Profiles:', COUNT(*) FROM coffee.coffee_profile
+UNION ALL
+SELECT 'QR Codes:', COUNT(*) FROM coffee.qrcode
+UNION ALL
+SELECT 'Price History:', COUNT(*) FROM coffee.price_history
+UNION ALL
+SELECT 'Users:', COUNT(*) FROM coffee.users;

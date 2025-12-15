@@ -18,6 +18,7 @@ export const getBatches = async () => {
             v.variety_id,
             v.name AS variety_name,
             v.species,
+            v.image_url,
             -- Farm info
             f.farm_id,
             f.name AS farm_name,
@@ -70,18 +71,45 @@ export const getBatchById = async (batchId) => {
     const { rows } = await query(`
         SELECT 
             b.*,
+            v.variety_id,
             v.name AS variety_name,
+            v.species,
+            v.image_url,
+            f.farm_id,
             f.name AS farm_name,
             f.region AS farm_region,
+            f.website AS farm_website,
+            pm.method_id,
             pm.name AS processing_method,
+            rl.level_id,
             rl.name AS roast_level,
-            cp.*
+            cp.profile_id,
+            cp.tasting_notes,
+            cp.acidity,
+            cp.body,
+            cp.sweetness,
+            cp.aftertaste,
+            cp.cupping_score,
+            ph.amount AS price_sell,
+            ph_orig.amount AS price_original
         FROM coffee.batch b
         JOIN coffee.variety v ON v.variety_id = b.variety_id
         JOIN coffee.farm f ON f.farm_id = b.farm_id
         LEFT JOIN coffee.processing_method pm ON pm.method_id = b.method_id
         LEFT JOIN coffee.roast_level rl ON rl.level_id = b.level_id
         LEFT JOIN coffee.coffee_profile cp ON cp.batch_id = b.batch_id
+        LEFT JOIN LATERAL (
+            SELECT amount FROM coffee.price_history
+            WHERE variety_id = v.variety_id AND price_type = 'selling'
+            AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
+            ORDER BY valid_from DESC LIMIT 1
+        ) ph ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT amount FROM coffee.price_history
+            WHERE variety_id = v.variety_id AND price_type = 'original'
+            AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
+            ORDER BY valid_from DESC LIMIT 1
+        ) ph_orig ON TRUE
         WHERE b.batch_id = $1
     `, [batchId]);
     return rows[0];

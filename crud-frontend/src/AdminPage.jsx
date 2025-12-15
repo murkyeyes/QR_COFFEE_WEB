@@ -29,23 +29,40 @@ function AdminPage() {
   };
 
   const handleSubmit = async (newBatchData) => {
+    // Lấy role từ localStorage
+    const userRole = localStorage.getItem('userRole') || 'admin';
+    
     if (modalMode === 'add') {
       try {
-        const response = await axios.post('http://localhost:3000/api/batches', newBatchData);
+        const response = await axios.post('http://localhost:3000/api/batches', newBatchData, {
+          headers: {
+            'X-User-Role': userRole
+          }
+        });
         setRefreshKey(k => k + 1);
       } catch (error) {
         console.error('Error adding batch:', error);
-        alert('Lỗi khi thêm lô sản phẩm: ' + error.message);
+        const errorMsg = error.response?.data?.error || 'Lỗi không xác định';
+        const errorDetails = error.response?.data?.details || error.message;
+        alert(`${errorMsg}\n\n${errorDetails}`);
+        return; // Không đóng modal nếu lỗi
       }
     } else {
       try {
         const id = clientData?.batch_id; 
         if (!id) throw new Error('Missing batch id for edit');
-        const response = await axios.put(`http://localhost:3000/api/batches/${id}`, newBatchData);
+        const response = await axios.put(`http://localhost:3000/api/batches/${id}`, newBatchData, {
+          headers: {
+            'X-User-Role': userRole
+          }
+        });
         setRefreshKey(k => k + 1);
       } catch (err) {
         console.error('Error editing batch:', err);
-        alert('Lỗi khi cập nhật lô sản phẩm: ' + err.message);
+        const errorMsg = err.response?.data?.error || 'Lỗi không xác định';
+        const errorDetails = err.response?.data?.details || err.message;
+        alert(`${errorMsg}\n\n${errorDetails}`);
+        return; // Không đóng modal nếu lỗi
       }
     }
     setIsOpen(false);

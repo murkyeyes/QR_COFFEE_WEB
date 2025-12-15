@@ -10,26 +10,35 @@ const qrcodeRegionId = "qr-code-full-region";
 const ProductScanner = (props) => {
 
     useEffect(() => {
-        // Tạo scanner mới
+        // Tạo scanner mới với cấu hình tối ưu CỰC MẠNH
         const html5QrcodeScanner = new Html5QrcodeScanner(
             qrcodeRegionId, 
             { 
-                fps: 10, // Tốc độ quét
-                qrbox: { width: 250, height: 250 } // Kích thước hộp quét
+                fps: 60, // Tăng lên 60 fps - cực nhanh
+                qrbox: 250, // Để số nguyên thay vì object - hiệu năng tốt hơn
+                aspectRatio: 1.0,
+                disableFlip: false,
+                rememberLastUsedCamera: true, // Nhớ camera đã chọn
+                // Thêm cấu hình camera để ưu tiên camera sau (tốt hơn cho quét)
+                videoConstraints: {
+                    facingMode: { ideal: "environment" } // Ưu tiên camera sau
+                },
+                formatsToSupport: [0] // Chỉ QR code
             },
             /* verbose= */ false
         );
 
         // Hàm xử lý khi quét thành công
         const onScanSuccess = (decodedText, decodedResult) => {
-            // decodedText là kết quả (ví dụ: "1", "2", "3" - là product_id)
+            console.log("QR Scanned:", decodedText); // Debug
             html5QrcodeScanner.clear(); // Dừng camera
-            props.onScanSuccess(decodedText); // Gửi kết quả về App.jsx
+            props.onScanSuccess(decodedText);
         };
         
         // Render camera
         html5QrcodeScanner.render(onScanSuccess, (error) => {
-            // Bỏ qua lỗi, không làm gì cả
+            // Chỉ log lỗi nghiêm trọng, bỏ qua lỗi quét thường
+            // console.warn("QR scan error:", error);
         });
 
         // Hàm dọn dẹp khi component unmount
